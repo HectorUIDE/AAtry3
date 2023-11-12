@@ -3,5 +3,5 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("what in tarnation? ಠ_ಠ")
+	fmt.Println("what in the-? ಠ_ಠ")
 }
