@@ -9,7 +9,7 @@ import (
 func main() {
 
 	for {
-		fmt.Println("Electronic Book Management System")
+		fmt.Println("Electronic Book Management System...")
 		fmt.Println("1. Add Book")
 		fmt.Println("2. View Books")
 		fmt.Println("3. Add Category")
@@ -78,7 +78,7 @@ func searchMenu() {
 	}
 }
 
-//---------------------------------------------------------------------------------------------
+//MODULE_1_BOOK---------------------------------------------------------------------------------------------
 
 type Book struct {
 	Title    string
@@ -108,7 +108,7 @@ func viewBooks() {
 	}
 }
 
-//---------------------------------------------------------------------------------------
+//MODULE_2_CATEGORY---------------------------------------------------------------------------------------
 
 type Category struct {
 	Name string
@@ -132,7 +132,7 @@ func viewCategories() {
 	}
 }
 
-//------------------------------------------------------------------------------------------------------
+//MODULE_3_SEARCH------------------------------------------------------------------------------------------------------
 
 func searchByTitle(title string) {
 	fmt.Printf("Search Results for Title '%s':\n", title)
@@ -161,7 +161,7 @@ func searchByCategory(category string) {
 	}
 }
 
-//----------------------------------------------------------------------------------------------------
+//MODULE_4_FILE----------------------------------------------------------------------------------------------------
 
 const fileName = "books.json"
 
