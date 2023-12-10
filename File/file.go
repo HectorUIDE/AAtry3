@@ -1,14 +1,17 @@
-package main
+package File
 
-/*
 import (
+	"AAtries/Book"
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
 const fileName = "books.json"
 
-func saveToFile() error {
+func SaveToFile() error {
+	books := Book.GetBooks()
+	fmt.Printf("Printing Book.GetBooks(): %v\n", Book.GetBooks())
 	file, err := os.Create(fileName)
 	if err != nil {
 		return err
@@ -24,7 +27,7 @@ func saveToFile() error {
 	return nil
 }
 
-func loadFromFile() error {
+func LoadFromFile(books *[]Book.Book) error {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return err
@@ -32,11 +35,12 @@ func loadFromFile() error {
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&books)
+
+	// Use the pointer to update the original books slice
+	err = decoder.Decode(books)
 	if err != nil {
 		return err
 	}
 
 	return nil
 }
-*/

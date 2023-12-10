@@ -1,7 +1,10 @@
 package main
 
 import (
-	"encoding/json"
+	"AAtries/Book"
+	"AAtries/Category"
+	"AAtries/File"
+	"AAtries/Search"
 	"fmt"
 	"os"
 )
@@ -25,19 +28,43 @@ func main() {
 
 		switch choice {
 		case 1:
-			addBook()
+			newBook1 := Book.Book{}
+
+			var title string
+			fmt.Print("Enter Title: ")
+			fmt.Scanln(&title)
+			fmt.Println(newBook1.SetTitle(title))
+
+			var author string
+			fmt.Print("Enter Author: ")
+			fmt.Scanln(&author)
+			fmt.Println(newBook1.SetAuthor(author))
+
+			var category string
+			fmt.Print("Enter Category: ")
+			fmt.Scanln(&category)
+			fmt.Println(newBook1.SetCategory(category))
+
+			fmt.Println(newBook1.AddBook())
 		case 2:
-			viewBooks()
+			Book.ViewBooks()
 		case 3:
-			addCategory()
+			newCategory1 := Category.Category{}
+
+			var category string
+			fmt.Print("Enter Category Name: ")
+			fmt.Scanln(&category)
+			fmt.Println(newCategory1.SetCategory(category))
+
+			fmt.Println(newCategory1.AddCategory())
 		case 4:
-			viewCategories()
+			Category.ViewCategories()
 		case 5:
 			searchMenu()
 		case 6:
-			saveToFile()
+			File.SaveToFile()
 		case 7:
-			loadFromFile()
+			File.LoadFromFile(Book.GetBooksPointer())
 		case 8:
 			fmt.Println("Exiting program.")
 			os.Exit(0)
@@ -62,22 +89,23 @@ func searchMenu() {
 		var title string
 		fmt.Print("Enter Title to search: ")
 		fmt.Scanln(&title)
-		searchByTitle(title)
+		Search.SearchByTitle(title)
 	case 2:
 		var author string
 		fmt.Print("Enter Author to search: ")
 		fmt.Scanln(&author)
-		searchByAuthor(author)
+		Search.SearchByAuthor(author)
 	case 3:
 		var category string
 		fmt.Print("Enter Category to search: ")
 		fmt.Scanln(&category)
-		searchByCategory(category)
+		Search.SearchByCategory(category)
 	default:
 		fmt.Println("Invalid search option. Returning to main menu.")
 	}
 }
 
+/*
 //MODULE_1_BOOK---------------------------------------------------------------------------------------------
 
 type Book struct {
@@ -196,3 +224,4 @@ func loadFromFile() error {
 
 	return nil
 }
+*/
