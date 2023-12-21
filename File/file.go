@@ -3,7 +3,6 @@ package File
 import (
 	"AAtries/Book"
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -11,7 +10,7 @@ const fileName = "books.json"
 
 func SaveToFile() error {
 	books := Book.GetBooks()
-	fmt.Printf("Printing Book.GetBooks(): %v\n", Book.GetBooks())
+	//	fmt.Printf("Printing Book.GetBooks(): %v\n", Book.GetBooks())
 	file, err := os.Create(fileName)
 	if err != nil {
 		return err

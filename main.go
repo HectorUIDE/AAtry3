@@ -10,7 +10,18 @@ import (
 )
 
 func main() {
+	/*
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintln(w, "Welcome to the Electronic Book Management System!")
+		})
+		http.HandleFunc("/addbook", addBookHandler)
+		http.HandleFunc("/viewbooks", viewBooksHandler)
+		http.HandleFunc("/addcategory", addCategoryHandler)
+		http.HandleFunc("/searchbookstitle", searchBooksByTitleHandler)
 
+		fmt.Println("Server is running on port 8080")
+		log.Fatal(http.ListenAndServe(":8080", nil))
+	*/
 	for {
 		fmt.Println("Electronic Book Management System...")
 		fmt.Println("1. Add Book")
@@ -20,14 +31,16 @@ func main() {
 		fmt.Println("5. Search Books")
 		fmt.Println("6. Save to File")
 		fmt.Println("7. Load from File")
-		fmt.Println("8. Exit")
+		fmt.Println("8. Remove book")
+		fmt.Println("9. Edit book")
+		fmt.Println("10. Exit")
 
 		var choice int
 		fmt.Print("Enter your choice: ")
 		fmt.Scanln(&choice)
 
 		switch choice {
-		case 1:
+		case 1: // Add Book
 			newBook1 := Book.Book{}
 
 			var title string
@@ -46,9 +59,9 @@ func main() {
 			fmt.Println(newBook1.SetCategory(category))
 
 			fmt.Println(newBook1.AddBook())
-		case 2:
+		case 2: // View Books
 			Book.ViewBooks()
-		case 3:
+		case 3: // Add Category
 			newCategory1 := Category.Category{}
 
 			var category string
@@ -57,15 +70,57 @@ func main() {
 			fmt.Println(newCategory1.SetCategory(category))
 
 			fmt.Println(newCategory1.AddCategory())
-		case 4:
+		case 4: // View Categories
 			Category.ViewCategories()
-		case 5:
+		case 5: // Search Book
 			searchMenu()
-		case 6:
-			File.SaveToFile()
-		case 7:
-			File.LoadFromFile(Book.GetBooksPointer())
-		case 8:
+		case 6: // Save File
+			//			File.SaveToFile()
+			// Implement goroutines so we don't have to wait for file SAVING to end
+			go func() {
+				if err := File.SaveToFile(); err != nil {
+					fmt.Println("Error saving to file:", err)
+				}
+			}()
+			fmt.Println("Save initiated...")
+
+		case 7: // Load file
+			//			File.LoadFromFile(Book.GetBooksPointer())
+			// Implement goroutines so we don't have to wait for file LOADING to end
+			go func() {
+				if err := File.LoadFromFile(Book.GetBooksPointer()); err != nil {
+					fmt.Println("Error loading from file:", err)
+				}
+			}()
+			fmt.Println("Loading initiated...")
+
+		case 8: // Delete
+			Book.ViewBooks()
+			var index int
+			fmt.Print("Enter the number of the book you wish to delete: ")
+			fmt.Scanln(&index)
+			fmt.Println(Book.DeleteBook(index))
+		case 9: // Edit
+			Book.ViewBooks()
+
+			var index int
+			fmt.Print("Enter the number of the book you wish to update: ")
+			fmt.Scanln(&index)
+
+			var title string
+			fmt.Print("Enter new Title: ")
+			fmt.Scanln(&title)
+
+			var author string
+			fmt.Print("Enter new Author: ")
+			fmt.Scanln(&author)
+
+			var category string
+			fmt.Print("Enter new Category: ")
+			fmt.Scanln(&category)
+
+			fmt.Println(Book.EditBook(index, title, author, category))
+		case 10: //Exit
 			fmt.Println("Exiting program.")
 			os.Exit(0)
 		default:
@@ -106,122 +161,81 @@ func searchMenu() {
 }
 
 /*
-//MODULE_1_BOOK---------------------------------------------------------------------------------------------
-
-type Book struct {
-	Title    string
-	Author   string
-	Category string
-}
-
-var books []Book
-
-func addBook() {
-	var newBook Book
-	fmt.Print("Enter Title: ")
-	fmt.Scanln(&newBook.Title)
-	fmt.Print("Enter Author: ")
-	fmt.Scanln(&newBook.Author)
-	fmt.Print("Enter Category: ")
-	fmt.Scanln(&newBook.Category)
-
-	books = append(books, newBook)
-	fmt.Println("Book added successfully!")
-}
-
-func viewBooks() {
-	fmt.Println("Books:")
-	for _, book := range books {
-		fmt.Printf("Title: %s, Author: %s, Category: %s\n", book.Title, book.Author, book.Category)
+func addBookHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
+		return
 	}
-}
 
-//MODULE_2_CATEGORY---------------------------------------------------------------------------------------
-
-type Category struct {
-	Name string
-}
-
-var categories []Category
-
-func addCategory() {
-	var newCategory Category
-	fmt.Print("Enter Category Name: ")
-	fmt.Scanln(&newCategory.Name)
-
-	categories = append(categories, newCategory)
-	fmt.Println("Category added successfully!")
-}
-
-func viewCategories() {
-	fmt.Println("Categories:")
-	for _, category := range categories {
-		fmt.Println(category.Name)
-	}
-}
-
-//MODULE_3_SEARCH------------------------------------------------------------------------------------------------------
-
-func searchByTitle(title string) {
-	fmt.Printf("Search Results for Title '%s':\n", title)
-	for _, book := range books {
-		if book.Title == title {
-			fmt.Printf("Author: %s, Category: %s\n", book.Author, book.Category)
-		}
-	}
-}
-
-func searchByAuthor(author string) {
-	fmt.Printf("Search Results for Author '%s':\n", author)
-	for _, book := range books {
-		if book.Author == author {
-			fmt.Printf("Title: %s, Category: %s\n", book.Title, book.Category)
-		}
-	}
-}
-
-func searchByCategory(category string) {
-	fmt.Printf("Search Results for Category '%s':\n", category)
-	for _, book := range books {
-		if book.Category == category {
-			fmt.Printf("Title: %s, Author: %s\n", book.Title, book.Author)
-		}
-	}
-}
-
-//MODULE_4_FILE----------------------------------------------------------------------------------------------------
-
-const fileName = "books.json"
-
-func saveToFile() error {
-	file, err := os.Create(fileName)
+	var newBook Book.Book
+	err := json.NewDecoder(r.Body).Decode(&newBook)
 	if err != nil {
-		return err
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
-	defer file.Close()
 
-	encoder := json.NewEncoder(file)
-	err = encoder.Encode(books)
+	err = newBook.AddBook()
 	if err != nil {
-		return err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	return nil
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("Book added successfully"))
 }
 
-func loadFromFile() error {
-	file, err := os.Open(fileName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&books)
-	if err != nil {
-		return err
+func viewBooksHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+		return
 	}
 
-	return nil
+	books := Book.GetBooks()
+	err := json.NewEncoder(w).Encode(books)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func addCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Only POST method is allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var newCategory Category.Category
+	err := json.NewDecoder(r.Body).Decode(&newCategory)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = newCategory.AddCategory()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte("Category added successfully"))
+}
+
+func searchBooksByTitleHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	title := r.URL.Query().Get("title")
+	if title == "" {
+		http.Error(w, "Title parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	results := Search.SearchByTitle(title)
+	err := json.NewEncoder(w).Encode(results)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 */
